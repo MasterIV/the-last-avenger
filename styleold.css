@@ -1,0 +1,374 @@
+body {
+	margin: 0px;
+	padding: 0px;
+	background: black;
+	color: white;
+	font-family: sans-serif;
+	font-size: 12px;
+	overflow: hidden;
+	display:block;
+}
+
+#gameframe {
+	position: relative;
+	background-image: url('img/bg_jan.png');
+	overflow: hidden;
+}
+
+#avenger {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	margin-top: -27px;
+	margin-left: -27px;
+	background: url( 'img/avenger_only.png' ) top left no-repeat;
+	width: 54px;
+	height: 54px;
+}
+
+.shot_normal {
+	width: 7px;
+	height: 16px;
+	position: absolute;
+	background: url( 'img/schuss.png' ) top left no-repeat;
+}
+
+.shot_phasor {
+	width: 7px;
+	height: 16px;
+	position: absolute;
+	background: url( 'img/phasor.png' ) top left no-repeat;
+}
+
+.shot_disruptor {
+	width: 7px;
+	height: 16px;
+	position: absolute;
+	background: url( 'img/disruptor.png' ) top left no-repeat;
+}
+
+.shot_plasma {
+	width: 12px;
+	height: 21px;
+	position: absolute;
+	background: url( 'img/plasma.png' ) top left no-repeat;
+}
+
+.asteroid_1 {
+	z-index: 1;
+	width: 50px;
+	height: 39px;
+	position: absolute;
+	background: url( 'img/asteroid1.png' ) top left no-repeat;
+}
+
+.asteroid_2 {
+	z-index: 1;
+	width: 60px;
+	height: 46px;
+	position: absolute;
+	background: url( 'img/asteroid2.png' ) top left no-repeat;
+}
+
+.asteroid_3 {
+	z-index: 1;
+	width: 35px;
+	height: 27px;
+	position: absolute;
+	background: url( 'img/asteroid3.png' ) top left no-repeat;
+}
+
+.asteroid_4 {
+	z-index: 1;
+	width: 60px;
+	height: 52px;
+	position: absolute;
+	background: url( 'img/asteroid4.png' ) top left no-repeat;
+}
+
+.asteroid_5 {
+	z-index: 1;
+	width: 60px;
+	height: 52px;
+	position: absolute;
+	background: url( 'img/asteroid5.png' ) top left no-repeat;
+}
+
+#status {
+	position:absolute;
+	left: 50%;
+	margin-left: -400px;
+	bottom: 20px;
+	width: 800px;
+	border: 1px solid white;
+	z-index: 15;
+	background-color: black;
+}
+
+.ship_info {
+	border: 1px solid white;
+	width: 70px;
+}
+
+.ship_info div {
+	margin: auto;
+	background: url( 'img/avenger_only.png' ) top left no-repeat;
+	width: 54px;
+	height: 54px;
+}
+
+.bar_info {
+	border: 1px solid white;
+	width: 200px;
+	line-height: 20px;
+	background-repeat: no-repeat;
+	padding: 0px;
+}
+
+.button {
+	border: 1px solid white;
+	width: 100px;
+	cursor: pointer;
+	text-align: center;
+}
+
+
+.button:hover, input:hover, #baseotions div.active:hover {
+	border: 1px solid #99FF99;
+	color: #99FF99;
+	background-color: #222222;
+}
+
+#inventory {
+	border: 1px solid white;
+	overflow: auto;
+}
+
+.explosion {
+	width: 128px;
+	height: 128px;
+	position: absolute;
+	background-image: url( 'img/explosion.png' );
+}
+
+.fighter1 {
+	width: 35px;
+	height: 38px;
+	position: absolute;
+	background-image: url( 'img/ship2.png' );
+}
+
+.fighter2 {
+	width: 46px;
+	height: 44px;
+	position: absolute;
+	background-image: url( 'img/ship1.png' );
+}
+
+.fighter3 {
+	width: 69px;
+	height: 77px;
+	position: absolute;
+	background-image: url( 'img/ship3.png' );
+}
+
+.cat {
+	width: 39px;
+	height: 54px;
+	position: absolute;
+	background-image: url( 'img/nyancat.png' );
+}
+
+.base {
+	width: 200px;
+	height: 200px;
+	position: absolute;
+	background-image: url( 'img/base0.png' );
+}
+
+#base_indicator {
+	width: 150px;
+	height: 150px;
+	position: absolute;
+	background-image: url( 'img/arrow.png' );
+	top: 50%;
+	left: 50%;
+	margin-top: -75px;
+	margin-left: -75px;
+	display: none;
+}
+
+.ammo {
+  width: 25px;
+  height: 25px;
+  position:absolute;
+  background: url(img/item1.png);
+}
+
+.nova {
+  width: 500px;
+  height: 500px;
+  position: absolute;
+	top: 50px;
+	left: 150px;
+  background: url(img/nova.png);
+}
+
+#gameframe .technology {
+  width: 25px;
+  height: 25px;
+  position: absolute;
+  background:url(img/item2.png);
+}
+
+#gameframe .upgrade {
+  width: 25px;
+  height: 25px;
+  position: absolute;
+  background:url(img/item3.png);
+}
+
+#gameframe .repair {
+  width: 25px;
+  height: 25px;
+  position: absolute;
+  background:url(img/item5.png);
+}
+
+#invwarn {
+  position: absolute;
+	color: red;
+	bottom: 0px;
+	right: 0px;
+	display: none;
+}
+
+.dialog {
+	width: 482px;
+	margin: auto;
+	margin-top: 30px;
+	z-index: 10;
+	border: 1px solid white;
+	background-color: black;
+	padding: 10px;
+	position: relative;
+}
+
+.dialog h3 {
+	margin-top: 0px;
+}
+
+#dock, #menu {
+	display: none;
+}
+
+.dialog th, .dialog  td  {
+	text-align: left;
+	border: 1px solid white;
+	padding: 3px;
+}
+
+input {
+	background-color: black;
+	color: white;
+	border: 1px solid white;
+	padding: 3px;
+}
+
+#gameover {
+	height: 600px;
+	font-size: 100px;
+	z-index: 20;
+	position: relative;
+	background-color: black;
+	text-align: center;
+	display: none;
+}
+
+#gameover span {
+	line-height: 400px;
+}
+
+#baseotions {
+	height: 300px;
+	overflow: auto;
+	vertical-align: top;
+}
+
+#baseitems td {
+    height: 34px;
+    text-indent: 30px;
+}
+
+#repair {
+    background:url(img/item5.png) no-repeat 3px 3px;
+}
+
+#technology {
+   background:url(img/item2.png) no-repeat 3px 3px;
+}
+
+#upgrade {
+    background:url(img/item3.png) no-repeat 3px 3px;
+}
+
+#baseotions div {
+  margin:5px;
+}
+
+#baseotions div.active {
+  border:1px solid white;
+	cursor: pointer;
+}
+
+#baseotions div.inactive, .button.inactive {
+	color: #666;
+  border:1px solid #666;
+	background-color: #111111;
+}
+
+#baseotions div.inactive p {
+	color: red;
+}
+
+#baseotions div.done {
+	cursor: pointer;
+	color: #ccccff;
+  border:1px solid #ccccff;
+	background-color: #111111;
+}
+
+#baseotions h4, #baseotions p {
+  margin: 3px;
+}
+
+#baseotions span {
+  position:relative;
+  line-height: 37px;
+  margin-right: 5px;
+  float:right;
+  padding-right:30px;
+}
+
+#baseotions .o_technology span {
+   background:url(img/item2.png) no-repeat 100% 50%;
+}
+
+#baseotions .o_upgrade span {
+   background:url(img/item3.png) no-repeat 100% 50%;
+}
+
+#baseotions .o_repair span {
+   background:url(img/item5.png) no-repeat 100% 50%;
+}
+
+#welcome {
+	width: 603px;
+}
+
+#fps {
+	z-index: 15;
+	position: absolute;
+	bottom: 10px;
+	left: 10px;
+}

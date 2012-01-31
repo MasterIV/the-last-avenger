@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>The Last Avenger</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+ 	<link rel="stylesheet" type="text/css" href="style.css">
+	<meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=1" />
+
+	<script language="javascript" src="js/vector.js"></script>
+	<script language="javascript" src="js/ship.js"></script>
+	<script language="javascript" src="js/game.js"></script>
+	<script language="javascript" src="js/graphics.js"></script>
+	<script language="javascript" src="js/controls.js"></script>
+	<script language="javascript" src="js/objects.js"></script>
+	<script language="javascript" src="js/sound.js"></script>
+	<script language="javascript" src="js/animation.js"></script>
+	<script language="javascript" src="js/base.js"></script>
+	<script language="javascript" src="js/universe.js"></script>
+
+	<script language="javascript">
+		function init() {
+			game.screen = document.getElementById('gameframe');
+			game.s = game.screen.getContext("2d");
+			game.buffer = document.createElement('canvas');
+			game.b = game.buffer.getContext("2d");
+
+			window.onresize = resize;
+			resize();
+
+			document.onkeydown = key_down;
+			document.onkeyup   = key_up;
+
+			universe.scan();
+			setInterval( frames, 1000 );
+			game.loop();
+		}
+
+		function resize() {
+			game.w = window.innerWidth;
+			game.h = window.innerHeight;
+
+			var dia = Math.sqrt( game.w*game.w + game.h*game.h );
+			game.max_dist = Math.floor( dia/2 + 150 );
+			game.min_dist = Math.floor( dia/2 + 100 );
+
+			game.screen.width = game.w;
+			game.screen.height = game.h;
+			game.buffer.width = game.w;
+			game.buffer.height = game.h;
+		}
+
+		function frames() {
+			game.fps = game.frames;
+			game.frames = 0;
+		}
+	</script>
+</head>
+
+<body onload="g.load( init );">
+	<canvas id="gameframe"></canvas>
+
+</body>
+
+</html>
