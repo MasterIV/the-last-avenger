@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>The Last Avenger</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link rel="stylesheet" type="text/css" href="styleold.css">
+
+<script language="javascript" src="jsold/vector.js"></script>
+<script language="javascript" src="jsold/ship.js"></script>
+<script language="javascript" src="jsold/objects.js"></script>
+<script language="javascript" src="jsold/animation.js"></script>
+<script language="javascript" src="jsold/universe.js"></script>
+<script language="javascript" src="jsold/items.js"></script>
+<script language="javascript" src="jsold/upgrades.js"></script>
+<script language="javascript" src="jsold/weapon.js"></script>
+
+<script language="javascript">
+	var center = new Vector( 600, 400 );
+	var pause = false;
+  var menu = false;
+  var dock = false;
+	var dockable = true;
+	var gameover = false;
+	var cycle = 0;
+	var frames = 0;
+
+	var map = {
+		x: 0,
+		y: 0,
+		w: 0,
+		h: 0,
+		min_dist: 0,
+		max_dist: 0
+	};
+
+	var zentrum = center.substract(map);
+
+	var collection = {
+		shots: [],
+		enemys: [],
+		ani: [],
+		allys: [],
+		items: []
+	};
+
+	function game_loop() {
+		if( pause ) return;
+		if( gameover ) return;
+
+		var start = new Date().getTime();
+
+		cycle++;
+		frames++;
+
+		ship.update();
+
+		var move = deg_to_vector( ship.direction, ship.speed );
+		map.x -= move.x;
+		map.y -= move.y;
+
+		map.node.style.backgroundPosition = map.x%800+'px '+map.y%600+'px';
+		zentrum = center.substract(map);
+
+		universe.scan();
+
+		if( ship.cooldown ) {
+			ship.cooldown--;
+		} else if( ship.fire && ship.ammo ) {
+			weapons[ship.weapon]();
+			ship.cooldown = ship.firerate;
+			ship.ammo--;
+			ship.updateAmmo();
+		}
+
+		// update objects
+		for( var i in collection.shots )
+			collection.shots[i].update( move );
+		for( var i in collection.ani )
+			collection.ani[i].update( move );
+		for( var i in collection.allys )
+			collection.allys[i].update( move );
+
+    for (var i in collection.items ) {
+      var e =  collection.items[i];
+      e.update( move );
+
+			if( e.constructor == ammo || inventory.length < ship.max_inventory)
+				if( center.dist(e.c) < e.r + ship.radius ) {
+					e.collect();
+					var sound = new Audio( 'sound/collectitem.ogg' );
+					sound.play();
+
+					if( inventory.length >= ship.max_inventory )
+						document.getElementById('invwarn').style.display = 'block';
+
+					break;
+				}
+    }
+
+		for( var i in collection.enemys ) {
+			var e = collection.enemys[i];
+			e.update( move );
+
+			if( center.dist(e.c) < e.r + ship.radius ) {
+				e.destroy();
+				ship.harm(e.damage);
+				break;
+			}
+
+			for( var i in collection.shots ) {
+				var s = collection.shots[i];
+				if( e.c.dist(s.c) < e.r + s.r ) {
+					s.remove();
+					if( e.harm( ship.damage )) break;
+				}
+			}
+		}
+
+		if( basis )
+			if( basis.arrow ) {
+				basis.updateArrow();
+			} else {
+
+				if( basis.c.dist( center ) < basis.r  ) {
+					if( !dockable ) {
+						dockable = true;
+						document.getElementById("dockbutton").className = "button";
+					}
+				} else {
+					if( dockable ){
+						dockable = false;
+						document.getElementById("dockbutton").className = "button inactive";
+					}
+				}
+			}
+
+
+		if( ship.novacooldown ) {
+			ship.novacooldown--;
+		} else if( ship.novafire && ship.nova ) {
+			collection.ani.push( new nova());
+			ship.novacooldown = 30;
+
+			for( var i in collection.enemys ) {
+				var e = collection.enemys[i];
+				if( center.dist(e.c) < e.r + 190 ) e.harm( 40 );
+			}
+		}
+
+		var refresh = 24 + start - new Date().getTime();
+		if( refresh < 1 ) game_loop();
+		else setTimeout( game_loop, refresh );
+	}
+
+	function init() {
+    document.onkeydown = key_down;
+    document.onkeyup   = key_up;
+
+		ship.node = document.getElementById( 'avenger' );
+		map.node = document.getElementById( 'gameframe' );
+
+		window.onresize = resize;
+		resize();
+
+		universe.create(0, 0);
+		universe.scan();
+
+		setInterval(fps, 1000);
+		game_loop();
+	}
+
+
+	function resize() {
+		map.w = window.innerWidth;
+		map.h = window.innerHeight;
+
+		center = new Vector( Math.round(map.w/2), Math.round(map.h/2));
+
+		var dia = Math.sqrt( map.w*map.w + map.h*map.h );
+		map.max_dist = Math.floor( dia/2 + 150 );
+		map.min_dist = Math.floor( dia/2 + 100 );
+
+		map.node.style.width = map.w+'px';
+		map.node.style.height = map.h+'px';
+	}
+
+	function fps() {
+		document.getElementById('fps').innerHTML = 'FPS: '+frames;
+		frames = 0;
+	}
+
+  function key_down(evt) {
+    evt = (evt) ? evt : ((event) ? event : null);
+		//console.log( evt.keyCode );
+
+		if( evt ) {
+			if( evt.keyCode == 116 ) return true;
+			if( evt.keyCode == 38 ) ship.accelerat = ship.speed_f;
+			if( evt.keyCode == 40 ) ship.accelerat = -ship.speed_f;
+			if( evt.keyCode == 37 ) ship.turn = -ship.turn_f;
+			if( evt.keyCode == 39 ) ship.turn = ship.turn_f;
+
+			if( evt.keyCode == 32 ) ship.fire = 1;
+			if( evt.keyCode == 86 ) ship.novafire = 1;
+
+			if( evt.keyCode == 80 ) togglepause();
+			if( evt.keyCode == 83 ) togglemenu();
+			if( evt.keyCode == 68 ) toggledock();
+
+
+
+			if( evt.keyCode == 78 ) {
+				var start = zentrum.add( deg_to_vector( ship.direction + Math.round(Math.random() * 30 - 15), 500 ));
+
+				document.getElementById('bgmusic').pause();
+				document.getElementById('catmusic').play();
+
+				var nyancat = new nyan( start.x, start.y );
+				nyancat.show();
+			}
+
+			return false;
+		}
+	}
+
+  function key_up(evt) {
+    evt = (evt) ? evt : ((event) ? event : null);
+
+		if( evt ) {
+			if( evt.keyCode == 116 ) return true;
+			if( evt.keyCode == 38 && ship.accelerat > 0 ) ship.accelerat = 0;
+			if( evt.keyCode == 40 && ship.accelerat < 0 ) ship.accelerat = 0;
+			if( evt.keyCode == 37 && ship.turn < 0 ) ship.turn = 0;
+			if( evt.keyCode == 39 && ship.turn > 0 ) ship.turn = 0;
+
+			if( evt.keyCode == 32 ) ship.fire = 0;
+			if( evt.keyCode == 86 ) ship.novafire = 0;
+
+			return false;
+		}
+  }
+
+	function loose() {
+		gameover = true;
+		cycle = 0;
+
+		ship.node.style.display = 'none';
+		collection.ani.push( new explosion( center ));
+		ani();
+	}
+
+	function ani() {
+		var move = new Vector(0, 0);
+		for( var i in collection.ani )
+			collection.ani[i].update( move );
+
+		if( cycle == 30 ) {
+			document.getElementById('gameover').style.display = 'block';
+			document.getElementById('gameover').style.opacity = .05;
+		} else if( cycle > 30 ) {
+			document.getElementById('gameover').style.opacity = .05 + ( cycle - 30 ) * .05;
+		}
+
+		cycle++;
+		if( cycle < 50 ) setTimeout( ani, 25 );
+	}
+
+	function togglepause() {
+		if( pause && !menu && !dock ) {
+			pause = false;
+			game_loop();
+		} else {
+			pause = true;
+		}
+	}
+
+  function togglemenu() {
+		if (dock) return;
+
+    if (menu) {
+      menu=false;
+      togglepause();
+      document.getElementById('menu').style.display="none";
+    } else {
+      menu = true;
+			pause = true;
+
+      for (var i in ship ) {
+        var node = document.getElementById("stat_"+i);
+        if (node) node.innerHTML = Math.round(ship[i] * 10) / 10;
+      }
+
+      document.getElementById('menu').style.display="block";
+    }
+  }
+
+	function toggledock() {
+		if( !dockable || menu ) return;
+
+    if (dock) {
+      dock=false;
+      togglepause();
+      document.getElementById('dock').style.display="none";
+    } else {
+      dock = true;
+			pause=true;
+
+			var sound = new Audio ( 'sound/dock.ogg' );
+			sound.play();
+
+			transferItems();
+			showtechlist();
+
+			if( ship.ammo < 20 ) {
+				ship.ammo = 20;
+				ship.updateAmmo();
+			}
+
+      document.getElementById('dock').style.display="block";
+    }
+  }
+
+	function win() {
+		if( !ship.superweapon ) return;
+		if( !basis || basis.technology < 50 ) return;
+		window.location = 'win.php?name=' + prompt( 'Bitte Namen eingeben:', '' );
+	}
+
+	function repair_ship() {
+		if( !basis || basis.repair < 5 ) return;
+		if( ship.life == ship.life_max ) return;
+
+		sound = new Audio ( 'sound/repair.ogg' );
+		sound.play();
+
+		basis.repair -= 5;
+		ship.life += 30;
+
+		document.getElementById('repair').innerHTML = basis.repair;
+		if( ship.life > ship.life_max ) ship.life = ship.life_max;
+		ship.updateLife();
+	}
+</script>
+</head>
+
+<body onload="init()">
+	<audio autoplay="autoplay" loop="loop" id="bgmusic">
+		<source src="sound/bgsound.ogg" type="audio/ogg">
+	</audio>
+
+	<audio id="catmusic">
+		<source src="sound/nyancat.ogg" type="audio/ogg">
+	</audio>
+
+	<div id="gameframe">
+		<div id="avenger"><img src="img/avenger_shield.png" alt="shield" border="0" id="shield"></div>
+		<div id="base_indicator"></div>
+
+		<div id="gameover"><span>Game Over</span><br><input type="button" onclick="window.location.reload();" value="Neues Spiel"></div>
+
+    <div class="dialog" id="menu">
+      <h3>Status</h3>
+
+      <table width="100%" id="settings">
+        <tr>
+          <th>Eigenschaft</th>
+          <th>Wert</th>
+        </tr>
+        <tr>
+          <td>Schild</td>
+          <td><span id="stat_shield"></span>/<span id="stat_shield_max"></span></td>
+        </tr>
+        <tr>
+          <td>Leben</td>
+          <td><span id="stat_life"></span>/<span id="stat_life_max"></span></td>
+        </tr>
+        <tr>
+          <td>Munition</td>
+          <td><span id="stat_ammo"></span>/<span id="stat_ammo_max"></span></td>
+        </tr>
+        <tr>
+          <td>Schild Regenerationskonstante</td>
+          <td id="stat_shield_reg"></td>
+        </tr>
+        <tr>
+          <td>Schuss Regeneration</td>
+          <td id="stat_ammo_reg"></td>
+        </tr>
+        <tr>
+          <td>Feuerrate</td>
+          <td id="stat_firerate"></td>
+        </tr>
+        <tr>
+          <td>Schaden</td>
+          <td id="stat_damage"></td>
+        </tr>
+        <tr>
+          <td>Frachtraum</td>
+          <td id="stat_max_inventory"></td>
+        </tr>
+      </table>
+
+			<p align="center"><input type="button" value="Close" onclick="togglemenu();"></p>
+    </div>
+
+
+		<div id="dock" class="dialog">
+			<h3>Heimatbasis</h3>
+
+      <table width="100%">
+        <tr id="baseitems">
+          <td id="upgrade">0</td>
+					<td id="technology">0</td>
+					<td id="repair">0</td>
+        </tr><tr>
+          <td colspan="3"><div id="baseotions"></div></td>
+        </tr>
+
+      </table>
+
+			<p align="center"><input type="button" value="Close" onclick="toggledock();"></p>
+    </div>
+
+		<div id="invwarn">Inventar voll!</div>
+	</div>
+
+	<div id="status"><table width="100%">
+		<tr>
+			<td rowspan="3" class="ship_info"><div><img src="img/avenger_shield.png" alt="shield" border="0" id="shield_info"></div></td>
+			<td class="bar_info" id="shield_bar" style="background-image: url('img/shield.png');">&nbsp;</td>
+			<td id="inventory" rowspan="3" valign="top"></td>
+			<td class="button" onclick="togglepause();"><u>P</u>ause</td>
+		</tr><tr>
+			<td class="bar_info" id="life_bar" style="background-image: url('img/armor.png');">&nbsp;</td>
+			<td class="button" onclick="togglemenu();"><u>S</u>tatus</td>
+		</tr><tr>
+			<td class="bar_info" id="ammo_bar" style="background-image: url('img/life.png');">&nbsp;</td>
+			<td class="button" id="dockbutton" onclick="toggledock();"><u>D</u>ock</td>
+		</tr>
+	</table></div>
+
+	<div id="fps"></div>
+</body>
+
+</html>
